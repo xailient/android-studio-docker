@@ -55,22 +55,24 @@ RUN wget "$ANDROID_STUDIO_URL" -O android-studio.tar.gz && \
 
 ARG NDK_VERSION=23.1.7779620
 
+# Important! Do these *before* using `sdkmanager` below!
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV ANDROID_HOME=/home/$USER/Android
+
 # Helpful links for info on installing SDK, NDK:
 #   https://developer.android.com/tools/sdkmanager
 COPY binaries/commandlinetools-linux-9477386_latest.zip .
-#RUN mkdir -p Android/sdk && \
-#    unzip commandlinetools-linux-9477386_latest.zip && \
-#    mkdir latest && \
-#    mv cmdline-tools/* latest && \
-#    mv latest cmdline-tools/ && \
-#    mv cmdline-tools Android/sdk/ && \
-#    echo "y\ny\ny\ny\ny\ny\n" | ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses && \
-#    echo "y\n" | ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --install "ndk;$NDK_VERSION" && \
-#    ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" && \
-#    ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-11" && \
-
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV ANDROID_HOME=/home/$USER/Android
+RUN mkdir -p Android/sdk && \
+    unzip commandlinetools-linux-9477386_latest.zip && \
+    rm commandlinetools-linux-9477386_latest.zip && \
+    mkdir latest && \
+    mv cmdline-tools/* latest && \
+    mv latest cmdline-tools/ && \
+    mv cmdline-tools Android/sdk/ && \
+    yes | ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --update && \
+    yes | ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses && \
+    ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" && \
+    ./Android/sdk/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-11"
 
 #RUN sudo mkdir -p /studio-data/profile /studio-data/platform-tools
 #RUN sudo chown -R $USER:$USER /studio-data
